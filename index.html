@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>JStorage</title>
+		<!-- Load from CDN
+			Alternately these files can be loaded from Web
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+		-->
+		
+		<!-- Load local 
+			If your page need to work without an internet connection you can load these 
+			files locally. 
+		-->
+		<script src="json2.js"></script>
+		<script src="jquery.min.js"></script>
+		<script src="jstorage.js"></script>
+		
+		<script> 
+		
+			// **************************************************************************
+			
+			// Make a new Object to hold the "APP"
+			var TASKAPP = TASKAPP || {};
+			
+			/* Use this variable to hold all of the other functions and variables  used 
+			by this page. */
+			
+			// **************************************************************************
+			
+			
+			
+			
+			// **************************************************************************
+			
+			// The constructor for a Task object.
+			function Task(name, className) {
+				this.name = name;
+				this.className = className;
+			}
+			
+			/* This function creates a Task object. Each task object is made up of two 
+			properties: name and className. */
+			
+			// **************************************************************************
+			
+			
+			// **************************************************************************
+			
+			// Add some functions to the TASKAPP object. 
+			
+			// This function generates a list tasks.
+			
+			TASKAPP.list_tasks = function() {
+				var array = $.jStorage.get("items");	// Get the task items array from local storage. 
+				var task_li_str = "";					// Make a new string. 
+				
+				// Now loop through each item in the array. 
+				for (var i = 0; i < array.length; i++) {
+					// Build a list item for each item to display on the page. 
+					// Add an attribute that holds the id/index of the task. 
+					task_li_str += "<li data-task-id='"+i+"'>";
+					// Make a link that displays the name and class for this task. 
+					task_li_str += "<a class='task-link' href='#'>"+array[i].name+" "+array[i].className+"</a>";
+					// Make a link to delete a task. 
+					task_li_str += " <a class='task-delete' href='#'>delete</a>";
+					task_li_str += "</li>";
+				}
+				
+				// Add the list of task to a DOM element. 
+				$("#task-list").html(task_li_str);
+			}
+			
+			// --------------------------------------------------------------------------
+			
+			// This function gets a single task by it's id 
+			
+			TASKAPP.get_task = function( index ) { 
+				// return a task at an index. 
+				return $.jStorage.get("items")[index];
+			}
+			
+			// --------------------------------------------------------------------------
+			
+			// This function lists classes 
+			
+			TASKAPP.list_classes = function() {
+				var array = $.jStorage.get("classes");	// Get the array of class names.
+				var class_li_str = "";					// Use this variable to build a list of classes to display. 
+				
+				// Loop through all of the classes. 
+				for (var i = 0; i < array.length; i++) {
+					// Build a list item containing the class name and a link for a delete button.
+					class_li_str += "<li data-class-id='"+i+"'>";
+					class_li_str += "<a class='class-link' href='#'>"+array[i]+"</a>";
+					class_li_str += " <a class='class-delete' href='#'>delete</a>";
+					class_li_str += "</li>";
+				}
+				// Add the list to this page. 
+				$("#class-list").html(class_li_str);
+			}
+			
+			// --------------------------------------------------------------------------
+			
+			// Gets a class by it's id number
+			
+			TASKAPP.get_class = function(index) {
+				// Return the class at index. 
+				return  $.jStorage.get("classes")[index];
+			}
+			
+			// **************************************************************************
+			
+			
+			
+			
+			// **************************************************************************
+			
+			// JQuery document ready. Code to run here after the page loads. 
+			
+			$(function(){
+				
+				// ----------------------------------------------------------------------
+				
+				// Initialize the local storage. If not items have been saved yet this 
+				// will create a default list of 10 items. 
+				
+				console.log("ready");
+				if (!$.jStorage.get("items")) { 
+					console.log("set items");
+					var array = [];				// make an empty array
+					for (i=0; i < 10; i++) {	// Loop 10 times. 
+						var task = new Task("Name", "WNM 100");	// make a new task.
+						array.push( task );						// add task to the array. 
+					}
+					
+					$.jStorage.set("items", array);				// Save array to local storage under key "items"
+					
+				}
+				
+				// ----------------------------------------------------------------------
+				
+				// Initial classes, this creates an array of three classes if classes 
+				// have not been created yet. 
+				
+				if (!$.jStorage.get("classes")) { // Check if a key "classes" exists. 
+					console.log("set classes");		
+					var array = [];						// Make an empty array.
+					for (i=0; i < 3; i++) {				// Loop three times. 
+						var className = "WNM 10" + i;	// Make a new class name. 
+						array.push( className );		// Push the name into the array. 
+					}
+					
+					$.jStorage.set("classes", array);	// save the classes array to local storage under the key "classes"
+					
+				}
+				
+				// ----------------------------------------------------------------------
+				
+				// Clear button
+				
+				// This creates a clear button to clear both the "items" key, and 
+				// "classes" key from local storage. 
+				
+				$("button#clear").click(function(){
+					$.jStorage.deleteKey("items");		// clear items
+					$.jStorage.deleteKey("classes");	// clear classes
+				});
+				
+				// ----------------------------------------------------------------------
+				
+				$("button#clear-classes").click(function(){
+					$.jStorage.deleteKey("classes");
+				});
+				
+				// ----------------------------------------------------------------------
+				
+				$("button#clear-tasks").click(function(){
+					$.jStorage.deleteKey("items");
+				});
+				
+				// ----------------------------------------------------------------------
+				
+				// Handle Add Task form submit. Use JQuery to listen for a form submit. 
+				// Then create a new task, add it to the task array and update the array 
+				// in local storage. 
+				
+				$("#add-task-form").submit(function(event){
+					event.preventDefault();						// Prevent normal form submit
+					var task_name = $("#task-name").val();		// get task name
+					var class_name = $("#task-class").val();	// get class
+					var task_array = $.jStorage.get("items");	// get task array
+					task_array.push(new Task(task_name, class_name));	// add new task
+					$.jStorage.set("items", task_array);	// update storage
+					TASKAPP.list_tasks();					// List the tasks
+					
+					// If we submit a class it might be new or it might exist already. 
+					// Better check and add it to the class list if isn't there. 
+					
+					if ($.jStorage.get("classes").indexOf(class_name) == -1) {
+						// This class doesn't exist
+						var class_array = $.jStorage.get("classes");	// Get the classes array. 
+						class_array.push(class_name);					// Add the new class name.
+						$.jStorage.set("classes", class_array);			// Save the updated class array to local storage. 
+						TASKAPP.list_classes();							// Display the updated list of classes. 
+					}
+					
+				});
+				// ----------------------------------------------------------------------
+				
+				// Handle Add class form submit. Add a new class name to the class array 
+				// and save that to local storage. 
+				
+				$("#add-class-form").submit(function(event){
+					event.preventDefault();						// Prevent the default submit action. 
+					var class_name = $("#class-name").val();	// Get the class name from the input field. 
+					
+					// Check that this name doesn't already exist. 
+					if ($.jStorage.get("classes").indexOf(class_name) == -1) {
+						var class_array = $.jStorage.get("classes");	// Get the classes array from local storage. 
+						class_array.push(class_name);					// Add the new name to the list. 
+						$.jStorage.set("classes", class_array);			// Save the updated array to local storage. 
+						TASKAPP.list_classes();							// Display the newly updated list to the page. 
+					}
+					
+				});
+				
+				// ----------------------------------------------------------------------
+				
+				// Task Details, display one task. This adds a handler to the parent ul
+				// That listens for clicks on child links. The element #task-list
+				// is empty when the page is loaded, and the content can change. Using 
+				// $().on() allows us to get messages from this element from child elements
+				// that might be added in the future. This event handler is added to the 
+				// parent element #task-list that listens for clicks on elements with the 
+				// class name task-link. 
+								
+				$("#task-list").on("click", ".task-link", function(event){
+					event.preventDefault();									// Prevent the default behavior of the link. 
+					var task_id = $(this).parent().attr("data-task-id");	// Get the id of the task, from the link. It's on the parent of the link. 
+					var task = $.jStorage.get("items")[task_id];			// Get the item from the task array.
+					console.log("task link", task_id);						
+					
+					// Make a form with an input field for the task name and class name. 
+					var details_str = "<form action='#' method='post' data-task-id='"+task_id+"'>";
+					details_str += "<p><label>Task Name:</label><br>";
+					details_str += "<input name='task-name' type='text' value='"+task.name+"'></p>";
+					details_str += "<p><label>Class Name</label><br>";
+					details_str += "<input name='class-name' type='text' value='"+task.className+"'></p>";
+					details_str += "<input name='submit' type='submit'>";
+					details_str += "</form>";
+					
+					
+					$("#task-details").html(details_str);
+				});
+				
+				// ----------------------------------------------------------------------
+				
+				// Delete task, this deletes a task from the task list. Again, this uses
+				// jquery $().on() to listen for clicks on links that may show up here in 
+				// the future. 
+				
+				$("#task-list").on("click", ".task-delete", function(event) {
+					event.preventDefault();									// Prevent default submit behavior. 
+					var task_id = $(this).parent().attr("data-task-id");	// Get the id/index for this task item. 
+					console.log("task delete", task_id);					// 
+					var task_array = $.jStorage.get("items");				// Get the array of tasks from local storage. 
+					task_array.splice(task_id, 1);							// Delete the item at the id/index
+					$.jStorage.set("items", task_array);					// Save the modified array to local storage. 
+					TASKAPP.list_tasks();									// Update the list displayed on the page. 
+				});
+				
+				// ----------------------------------------------------------------------
+				
+				// Class Details 
+				
+				// ----------------------------------------------------------------------
+				
+				// Delete Class from the list of classes and update local storage. 
+				
+				$("#class-list").on("click", ".class-delete", function() {
+					event.preventDefault();									// Prevent the default behavior. 
+					var class_id = $(this).parent().attr("data-class-id");	// Get the id/index for this class name. 
+					console.log("delete class at index", class_id);			
+					var class_array = $.jStorage.get("classes");			// Get the array of class names from local storage. 
+					class_array.splice(class_id, 1);						// Remove the class from the array. 
+					$.jStorage.set("classes", class_array);					// Save the modified array to local storage. 
+					TASKAPP.list_classes();									// Update the list of classes in the page. 
+				});
+				
+				// ----------------------------------------------------------------------
+				
+				// Update a class from displayed in the details form. Again, use $().on()
+				// To listen for a submit from the form here, since content of this 
+				// element will change. 
+				
+				$("#task-details").on("submit", "form", function(event) {
+					event.preventDefault();													// Prevent the default behavior of the form submit. 
+					var task_id = $(this).attr("data-task-id");								// Get the task id/index from the form element. 
+					var new_task_name = $(this).find( "input[name='task-name']" ).val();	// Get the task name from the input element. 
+					var new_class_name = $(this).find("input[name='class-name']").val();	// Get the class name from the input element. 
+							
+					console.log("Submit details", task_id, new_task_name, new_class_name);
+					
+					var task_array = $.jStorage.get("items");			// Get the array of tasks. 
+					task_array[task_id].name = new_task_name;			// Set the name of the element at the index. 
+					task_array[task_id].className = new_class_name;		// Set the class name of the element at index. 
+					
+					$.jStorage.set("items", task_array);	// Save the array to local store. 
+					
+					console.log("***", $.jStorage.get("classes"));
+					
+					// If the class name was updated it might be new, in which case we want to add it to the list of classes. 
+					if ($.jStorage.get("classes").indexOf(new_class_name) == -1) {	// Check if the new class name exists. If not...
+						var classes_array = $.jStorage.get("classes");	// Get the array of classes. 
+						classes_array.push(new_class_name);				// Push the new class name into the array. 
+						$.jStorage.set("classes", classes_array)		// Save the modified array to local store. 
+						
+						TASKAPP.list_classes();							// Update the list of class names. 
+					}
+					
+					TASKAPP.list_tasks();
+					TASKAPP.list_classes();
+				});
+				
+				// **********************************************************************
+				
+				
+				
+				TASKAPP.list_tasks();
+				TASKAPP.list_classes();
+				
+				
+			});
+			
+		</script>
+	</head>
+	<body>
+		<h1>jStorage</h1>
+		<p>
+			<button id="clear">Clear</button>
+		</p>
+		
+		<div>
+			<h1>Add Task</h1>
+			<form id="add-task-form" action="#" method="post">
+				<p><label>Task/Homework assignment</label><br>
+				<input name="task-name" id="task-name" type="text"></p>
+				<p><label>Class Name</label><br>
+				<input name="task-class" id="task-class" type="text"></p>
+				<p><input name="task-submit" id="task-submit" type="submit"></p>
+			</form>
+		</div>
+		
+		<div>
+			<h1>Add Class</h1>
+			<form id="add-class-form" action="#" method="post">
+				<p><label>Class Name</label><br>
+				<input name="class-name" id="class-name" type="text"></p>
+				<p><input name="class-submit" id="class-submit" type="submit"></p>
+			</form>
+		</div>
+		
+		<div>
+			<ul id="task-list"></ul>
+			<ul id="class-list"></ul>
+		</div>
+		
+		<div id="task-details">
+			
+		</div>
+		
+		
+		<div>
+			<h1>Using Local Storage</h1>
+			
+			<h2>What is local storage?</h2>
+			
+			<p>This example uses local storage to create data that persists across 
+			browsing sessions. Local storage is available on the computer or 
+			mobile device where it was created. Local data does not 
+			follow you across devices.</p>
+			
+			<h2>What is it good for?</h2>
+			
+			<p>Local storage is good for personal information that you would want to 
+			save with the device, and not share with the world, or share across 
+			devices. Local data is good for data that needs to be available when you are
+			offline. </p> 
+			
+			<p>The ideas presented here could be applied to mobile apps built 
+			with HTML5, and web sites, that need persistent data. This data saved with
+			the app/site would be available the next time a user visited the site or 
+			reopened the app.</p>
+			
+			<p>Local storage can be used with for web sites that need to persist data 
+			from one page to the next; or for sites that need to persist data from 
+			session to session.</p>
+			
+			<p>For mobile apps, built with HTML5, local storage is a good way to save 
+			data with the app. This could be used for saving user information and 
+			preferences, or data that is core to the app itself. Foe example a game 
+			could save high scores and information describing levels that have been 
+			unlocked. </p>
+			
+			<p>Local storage would also be good for mocking up apps or web sites. Using 
+			local storage is easier than creating a database and writing code to manage 
+			it. </p>
+			
+			<p>Local storage has an advantage, in the data being available without an 
+			internet connection. There is a also a performance advantage, since the 
+			data is saved locally the time taken to read and write information is 
+			faster.</p>
+			
+			<h2>What kind of data can you store?</h2>
+			
+			<p>This example stores data in the json format. The data is primarily text.
+			This would include strings, numbers, and other json friendly types like 
+			arrays, and Javascript objects.</p>
+			
+			<h2>Details</h2>
+			
+			<p>Local storage is an HTML5 feature. As part of HTML itself you don't any 
+			special language or plugins to use it.</p>
+			
+			<p>This example uses jStorage.js. This a jQuery extension that simplifies 
+			the process of using local storage. Using jStorage also creates consistency
+			across browsers. </p>
+			
+			<p>Data is saved in the json format using key value pairs. </p>
+			
+			<h2>What does this example do?</h2>
+			
+			<p>This example stores two lists or Arrays. The first list is a list of home or tasks.
+			The second list is a list of classes. Each homework task has a name and 
+			a class. Homework Tasks are defined as a Javascript object with two 
+			properties:</p>
+			
+			<ul>
+				<li>name</li>
+				<li>className</li>
+			</ul>
+			
+			<p>The classes array stores class names as strings.</p>
+			
+			<p>The first time you view this page the script sees that you do have any 
+			local data. So it creates 10 items named Name and class WNM 100. You should 
+			see these listed lower on the page. The button at the top allow you to clear
+			tasks and classes. This clears everything. Below is a form that adds new 
+			task/homework to the list. When a new item is added, the script checks the 
+			of class names for a duplicate before adding a new class. Each task and class
+			name shows as a link with delete link to the right. Clicking the name will 
+			shows the detail further down the page, while clicking delete removes the 
+			item from the list.</p>
+			
+			<p>Behind the scenes, the two arrays are stored in local storage. When the 
+			lists are displayed they are first retrieved from the local store. When an 
+			item is added the array is retrieved the new item is added, and the new array
+			is saved to local store again. </p>
+			
+			<p>Add and remove some classes. Refresh your browser window, and the list 
+			should show the last list. Close the browser window and open the page again. 
+			You should see your edited list. </p>
+			
+			<h2>More information</h2>
+			
+			<ul>
+				<li><a href="http://diveintohtml5.info/storage.html">Dive Into HTML5 Local storage</a></li>
+				<li><a href="http://www.w3schools.com/html/html5_webstorage.asp">HTML5 Local Storage</a></li>
+				<li><a href="http://www.html5rocks.com/en/features/storage">HTML5 Rocks Local Storage</a></li>
+				<li><a href="https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Storage">DOM Storage guide</a></li>
+			</ul>
+		</div>
+		
+	</body>
+</html>
+
+
+
+

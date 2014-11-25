@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+	</head>
+	<body>
+		
+		<script src="cart.js"></script>
+		<script>
+			// cart.js tests
+			addItem(1, "Thing");
+			addItem(1, "Thing");
+			addItem(2, "Foo");
+			addItem(3, "Bar");
+			addItem(3, "Bar");
+			addItem(4, "Widget");
+			addItem(4, "Widget");
+			
+			showArray()
+			
+			deleteItem(4);
+			showArray()
+			deleteItem(4);
+			showArray()
+			deleteItem(4);
+			showArray()
+			
+			function showArray() {
+				console.log("--------------------------");
+				var array = getCartArray();
+				for (var i = 0; i < array.length; i++) {
+					console.log( array[i] );
+				}
+			}
+			
+			var cart = getCart();
+			console.log( cart.length );
+			
+			// console.log( localStorage.getItem("foo") );
+			
+		</script>
+	</body>
+</html>

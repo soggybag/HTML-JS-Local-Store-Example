@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+	</head>
+	<body>
+		
+		<script src="cart.js"></script>
+		<script>
+			
+			// cart.js tests
+			// All functions and properties are attached to cart. Since all methods 
+			// and properties are attached to a single object this script only uses 
+			// one variable name.
+			
+			// This time all methods and properties are accessed through the name cart. 
+			
+			cart.addItem(1, "Thing");
+			cart.addItem(1, "Thing");
+			cart.addItem(2, "Foo");
+			cart.addItem(3, "Bar");
+			cart.addItem(3, "Bar");
+			cart.addItem(4, "Widget");
+			cart.addItem(4, "Widget");
+			
+			showArray()
+			
+			cart.deleteItem(4);
+			showArray()
+			cart.deleteItem(4);
+			showArray()
+			cart.deleteItem(4);
+			showArray()
+			
+			function showArray() {
+				console.log("--------------------------");
+				var array = cart.getCartArray();
+				for (var i = 0; i < array.length; i++) {
+					console.log( array[i] );
+				}
+			}
+			
+			var cart = cart.getCart();
+			console.log( cart.length );
+			
+			// console.log( localStorage.getItem("foo") );
+			
+		</script>
+	</body>
+</html>
